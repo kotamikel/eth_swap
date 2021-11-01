@@ -9,7 +9,7 @@ require('chai')
 
 // Make the DApp Token Human readable
 function tokens(n) {
-	// Convert token to WEI
+	// Convert token to WEI at the smart contract level
 	return web3.utils.toWei(n, "ether");
 }
 //Test
@@ -20,7 +20,7 @@ contract('EthSwap', (accounts) => {
 	// Create a BEFORE HOOK to avoid repeating code. 
 	before(async () => {
 		token = await Token.new()
-		ethSwap = await EthSwap.new()
+		ethSwap = await EthSwap.new(token.address)
 		await token.transfer(ethSwap.address, tokens('1000000'))
 	})
 
@@ -38,12 +38,11 @@ contract('EthSwap', (accounts) => {
 			const name = await ethSwap.name()
 			assert.equal(name, 'EthSwap Instant Exchange')
 		})
+		//Test to see if the contract HAS TOKENS
 		it('contract has tokens', async () => {
 			let balance = await token.balanceOf(ethSwap.address)
 			assert.equal(balance.toString(), tokens('1000000'))
 
 		})
 	})
-
-	//Test to see if the contract HAS TOKENS
 })
