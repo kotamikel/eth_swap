@@ -4,18 +4,19 @@ pragma solidity ^0.5.0;
 import "./Token.sol";
 
 contract EthSwap {
-	// Statically typed language - string variable
-	// Public - a function on the smart contract called name which will return that value. 
+
 	// STATE VARIABLE - data is actually stored on the blockchain
 	string public name = "EthSwap Instant Exchange";
-
-	// Keep track of token through a var - token methods will be called on this varaible. 
-	// Just the code for SC doesnt tell us where it is on blockchain
 	Token public token;
-
-	// Redemption rate = # of tokens they recieve for 1 ether 
-	// unsigned integer - cant be negative and decimal places
 	uint public rate = 100;
+
+	// Event definition
+	event TokenPurchased(
+		address account,
+		address token,
+		uint amount,
+		uint rate
+	);
 
 	//Set the address of the token(which lives on BC)
 	constructor(Token _token) public {
@@ -33,5 +34,8 @@ contract EthSwap {
 		// arg1 - msg is a global variable in solidity - sender is value of address calling this function
 		// arg2 - the value of tokens based on the eth amount they are sending. 
 		token.transfer(msg.sender, tokenAmount);
+
+		// Emit an event. 
+		emit TokenPurchased(msg.sender, address(token), tokenAmount, rate);
 	}
 }
