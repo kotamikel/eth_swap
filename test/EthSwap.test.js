@@ -13,7 +13,8 @@ function tokens(n) {
 	return web3.utils.toWei(n, "ether");
 }
 //Test
-contract('EthSwap', (accounts) => {
+// Refactor to not read out array - accounts = [deployer, investor]
+contract('EthSwap', ([deployer, investor]) => {
 	//make these variables available in the other fn
 	let token, ethSwap
 
@@ -43,6 +44,32 @@ contract('EthSwap', (accounts) => {
 			let balance = await token.balanceOf(ethSwap.address)
 			assert.equal(balance.toString(), tokens('1000000'))
 
+		})
+	})
+
+	// FROM - corresponds to msg.sender
+	// VALUE - corresponds to msg.value 
+	describe('buyTokens()', async () => {
+
+		let result 
+
+		before(async () => {
+			result = await ethSwap.buyTokens({ from: investor, value: web3.utils.toWei('1', "ether")})
+		})
+		
+		it('Allows user to instantly purchase tokens from ethSwap for a fixed price', async () => {
+			// check investor token balance after purchase
+			let investorBalance = await token.balanceOf(investor)
+			assert.equal(investorBalance.toString(), tokens('100'))
+
+			// check ethSwap balance after purchase
+			let ethSwapBalance
+			ethSwapBalance = await token.balanceOf(ethSwap.address)
+			assert.equal(ethSwapBalance.toString(), tokens('999900'))
+
+			// check ethbalance went up
+			ethSwapBalance = await web3.eth.getBalance(ethSwap.address)
+			assert.equal(ethSwapBalance.toString(), web3.utils.toWei('1', 'Ether'))
 		})
 	})
 })
